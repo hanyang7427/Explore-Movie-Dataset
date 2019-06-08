@@ -37,13 +37,14 @@
 # 
 # 提示：记得使用 notebook 中的魔法指令 `%matplotlib inline`，否则会导致你接下来无法打印出图像。
 
-# In[1]:
+# In[4]:
 
 
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sb
+import missingno as msno
 
 get_ipython().run_line_magic('matplotlib', 'inline')
 
@@ -112,6 +113,12 @@ df.dtypes
 
 
 df.isnull().sum()
+
+
+# In[5]:
+
+
+msno.matrix(df)
 
 
 # 5.使用 .describe() 方法，看看数据表中数值型的数据是怎么分布的。
@@ -187,10 +194,18 @@ df[['id','popularity','budget','runtime','vote_average']]
 
 # 2.读取数据表中前1～20行以及48、49行的数据。
 
-# In[14]:
+# In[10]:
 
 
-df.loc[np.r_[1:21,48,49]]
+df.loc[np.r_[0:20,47,48]]
+
+
+# 3.读取数据表中第50～60行的 popularity 那一列的数据。
+
+# In[12]:
+
+
+df.loc[50:61,'popularity']
 
 
 # ---
@@ -262,23 +277,25 @@ df.groupby('director').agg({'popularity':'mean'}).sort_values(by='popularity',as
 
 # **任务3.1：**对 `popularity` 最高的20名电影绘制其 `popularity` 值。
 
-# In[19]:
+# In[43]:
 
 
 data = df.sort_values(by='popularity',ascending=False)[['original_title','popularity']].head(20)
 data.set_index('original_title',inplace=True)
-data.plot(kind='bar');
+ax = data.plot(kind='bar', title='top 20 popularity')
+ax.set(xlabel="movie", ylabel="popularity");
 
 
 # ---
 # **任务3.2：**分析电影净利润（票房-成本）随着年份变化的情况，并简单进行分析。
 
-# In[20]:
+# In[42]:
 
 
-data = df.groupby('release_year').agg({'budget_adj':'sum','revenue_adj':'sum'})
-profit_per_year = data['revenue_adj'] - data['budget_adj']
-profit_per_year.plot(kind='line');
+df['profit'] = df['revenue_adj'] - df['budget_adj']
+data = df.groupby('release_year').agg({'profit':'mean'})
+ax = data.plot(kind='line', title='profit trend with year')
+ax.set(xlabel="year", ylabel="profit of movie industry");
 
 
 # ---
